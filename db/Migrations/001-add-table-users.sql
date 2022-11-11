@@ -1,0 +1,14 @@
+CREATE TABLE Users
+(
+     Id INT IDENTITY(1,1) NOT NULL ,
+     FirstName VARCHAR(155) NOT NULL  ,
+     LastName VARCHAR(155) NOT NULL  ,
+     Email VARCHAR(155) NOT NULL  ,
+     UserName VARCHAR(155) NOT NULL  ,
+     Password VARCHAR(255) NOT NULL  ,
+     AccessToken VARCHAR(255) NOT NULL  ,
+     RefreshToken VARCHAR(255) NOT NULL  ,
+     CreationDate DATETIME2 NOT NULL DEFAULT GETDATE() ,
+     CONSTRAINT PK_Users PRIMARY KEY CLUSTERED (Id ASC) ON [PRIMARY]
+)
+GO
