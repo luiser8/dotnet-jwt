@@ -3,7 +3,6 @@ using DotnetJWT.Repository;
 using DotnetJWT.Request.User.Payloads;
 using DotnetJWT.Responses;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
 
 namespace DotnetJWT.Services
 {
@@ -21,51 +20,68 @@ namespace DotnetJWT.Services
             _userRepository = userRepository;
         }
 
-        public async Task<List<UserResponse>> GetUsers()
+        public async Task<UserResponse> LoginUserService(LoginPayload loginPayload)
         {
-            try{
-                var response = await _userRepository.GetUsers();
+            try
+            {
+                var response = await _userRepository.LoginUserRepository(loginPayload);
                 return response;
-            }catch(Exception ex){
-                throw new NotImplementedException(ex.Message);
             }
-        }
-        public async Task<UserResponse> GetUser(int id)
-        {
-            try{
-                var user = await _userRepository.GetUser(id);
-
-                return user;
-            }catch(Exception ex){
-                throw new NotImplementedException(ex.Message);
-            }
-        }
-        public async Task<User> PostUsers(UserPayload userPayload)
-        {
-            try{
-                var userCreated = await _userRepository.PostUsers(userPayload);
-
-                return userCreated;
-            }catch(Exception ex){
+            catch (Exception ex)
+            {
                 throw new NotImplementedException(ex.Message);
             }
         }
 
-        public async Task<User> PutUsers(int id, User user)
+        public async Task<string> RefreshTokenService(string actualToken)
         {
-            try{
-                var response = await _userRepository.PutUsers(id, user);
+            try
+            {
+                var response = await _userRepository.RefreshTokenRepository(actualToken);
                 return response;
-            }catch(Exception ex){
+            }
+            catch (Exception ex)
+            {
                 throw new NotImplementedException(ex.Message);
             }
         }
-        public async Task<User> DeleteUsers(int id)
+
+        public async Task<UserResponse> PostUsersService(UserPayload userPayload)
         {
-            try{
-                var response = await _userRepository.DeleteUsers(id);
-                return response;
-            }catch(Exception ex){
+            try
+            {
+                bool userNameExists = await _userRepository.ByUserNameRepository(userPayload.UserName);
+                bool userEmailExists = await _userRepository.ByEmailRepository(userPayload.Email);
+
+                if (userNameExists)
+                    throw new Exception("UserName all ready exists");
+
+                if (userEmailExists)
+                    throw new Exception("UserEmail all ready exists");
+
+                var userCreated = await _userRepository.PostUsersRepository(userPayload);
+                var userResponse = new UserResponse();
+
+                if (userCreated != null)
+                {
+                    userResponse = new UserResponse
+                    {
+                        Id = userCreated.Id,
+                        FirstName = userCreated.FirstName,
+                        LastName = userCreated.LastName,
+                        Email = userCreated.Email,
+                        UserName = userCreated.UserName,
+                        AccessToken = userCreated.AccessToken,
+                        RefreshToken = userCreated.RefreshToken,
+                        TokenCreated = userCreated.TokenCreated,
+                        TokenExpires = userCreated.TokenExpires
+                    };
+                }
+
+                return userResponse;
+            }
+            catch (Exception ex)
+            {
                 throw new NotImplementedException(ex.Message);
             }
         }

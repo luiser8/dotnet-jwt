@@ -6,10 +6,10 @@ namespace DotnetJWT.Repository
 {
     public interface IUserRepository
     {
-        Task<List<UserResponse>> GetUsers();
-        Task<UserResponse> GetUser(int id);
-        Task<User> PostUsers(UserPayload userPayload);
-        Task<User> PutUsers(int id, User user);
-        Task<User> DeleteUsers(int id);
+        Task<UserResponse> LoginUserRepository(LoginPayload loginPayload);
+        Task<User> PostUsersRepository(UserPayload userPayload);
+        Task<string> RefreshTokenRepository(string actualToken);
+        Task<bool> ByEmailRepository(string email);
+        Task<bool> ByUserNameRepository(string userName);
     }
 }
