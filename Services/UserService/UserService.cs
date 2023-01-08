@@ -20,6 +20,19 @@ namespace DotnetJWT.Services
             _userRepository = userRepository;
         }
 
+        public async Task<List<User>> GetUsersService()
+        {
+            try
+            {
+                var response = await _userRepository.GetUsersRepository();
+                return response;
+            }
+            catch (Exception ex)
+            {
+                throw new NotImplementedException(ex.Message);
+            }
+        }
+
         public async Task<UserResponse> LoginUserService(LoginPayload loginPayload)
         {
             try

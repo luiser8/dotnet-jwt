@@ -3,6 +3,7 @@ using DotnetJWT.Request.User.Payloads;
 using Microsoft.AspNetCore.Mvc;
 using DotnetJWT.Responses;
 using DotnetJWT.Services;
+using Microsoft.AspNetCore.Authorization;
 
 namespace DotnetJWT.Controllers
 {
@@ -18,6 +19,23 @@ namespace DotnetJWT.Controllers
             _userService = userService;
         }
 
+        /// <summary>Users list</summary>
+        /// <remarks>It is possible return user list.</remarks>
+        [HttpGet, Authorize]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<User>> GetUsers()
+        {
+            try
+            {
+                var response = await _userService.GetUsersService();
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex);
+            }
+        }
+
         /// <summary>Users login</summary>
         /// <remarks>It is possible user login credentials.</remarks>
         [HttpPost("login")]
@@ -27,6 +45,15 @@ namespace DotnetJWT.Controllers
             try
             {
                 var response = await _userService.LoginUserService(loginPayload);
+                var cookieOptions = new CookieOptions
+                {
+                    HttpOnly = true,
+                    Expires = response.TokenExpires,
+                    Secure = true,
+                    IsEssential = true
+                };
+                Response.Cookies.Append("accessToken", response.AccessToken, cookieOptions);
+
                 return Ok(response);
             }
             catch (Exception ex)

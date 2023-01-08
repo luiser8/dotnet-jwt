@@ -15,6 +15,22 @@ namespace DotnetJWT.Repository
             _contextOptions = context;
         }
 
+        public async Task<List<User>> GetUsersRepository()
+        {
+            try
+            {
+                using (var _context = new DBContext(_contextOptions))
+                {
+                    var response = await _context.Users.ToListAsync();
+                    return response;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new NotImplementedException(ex.Message);
+            }
+        }
+
         public async Task<bool> ByEmailRepository(string email)
         {
             try
