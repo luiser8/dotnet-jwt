@@ -10,22 +10,44 @@ namespace DotnetJWT.Services
     {
         private readonly DbContextOptions<DBContext> _contextOptions;
         private readonly IUserRepository _userRepository;
+        private readonly IRolesRepository _rolesRepository;
 
         public UserService(
             DbContextOptions<DBContext> context,
-            IUserRepository userRepository
+            IUserRepository userRepository,
+            IRolesRepository rolesRepository
         )
         {
             _contextOptions = context;
             _userRepository = userRepository;
+            _rolesRepository = rolesRepository;
         }
 
-        public async Task<List<User>> GetUsersService()
+        public async Task<List<UserResponse>> GetUsersService()
         {
             try
             {
-                var response = await _userRepository.GetUsersRepository();
-                return response;
+                var userResponse = new List<UserResponse>();
+                var users = await _userRepository.GetUsersRepository();
+                foreach (var item in users)
+                {
+                    var roles = await _rolesRepository.GetRolesRepository(item.RoleId);
+                    userResponse.Add(new UserResponse
+                    {
+                        Id = item.Id,
+                        RoleId = (int)item.RoleId,
+                        FirstName = item.FirstName,
+                        LastName = item.LastName,
+                        Email = item.Email,
+                        UserName = item.UserName,
+                        AccessToken = item.AccessToken,
+                        RefreshToken = item.RefreshToken,
+                        TokenCreated = item.TokenCreated,
+                        TokenExpires = item.TokenExpires,
+                        Roles = roles,
+                    });
+                }
+                return userResponse;
             }
             catch (Exception ex)
             {
@@ -80,6 +102,7 @@ namespace DotnetJWT.Services
                     userResponse = new UserResponse
                     {
                         Id = userCreated.Id,
+                        RoleId = (int)userCreated.RoleId,
                         FirstName = userCreated.FirstName,
                         LastName = userCreated.LastName,
                         Email = userCreated.Email,
@@ -87,7 +110,7 @@ namespace DotnetJWT.Services
                         AccessToken = userCreated.AccessToken,
                         RefreshToken = userCreated.RefreshToken,
                         TokenCreated = userCreated.TokenCreated,
-                        TokenExpires = userCreated.TokenExpires
+                        TokenExpires = userCreated.TokenExpires,
                     };
                 }
 

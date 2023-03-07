@@ -23,7 +23,7 @@ namespace DotnetJWT.Controllers
         /// <remarks>It is possible return user list.</remarks>
         [HttpGet, Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<User>> GetUsers()
+        public async Task<ActionResult<UserResponse>> GetUsers()
         {
             try
             {
@@ -32,7 +32,7 @@ namespace DotnetJWT.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex);
+                return BadRequest(ex.Message);
             }
         }
 
@@ -58,14 +58,14 @@ namespace DotnetJWT.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex);
+                return BadRequest(ex.Message);
             }
         }
 
         /// <summary>Create users</summary>
         /// <remarks>It is possible to create users.</remarks>
         /// <param name="userPayload">Parameters to create a user.</param>
-        [HttpPost]
+        [HttpPost, Authorize]
         [ProducesResponseType(StatusCodes.Status201Created)]
         public async Task<ActionResult<User>> CreateUser([FromBody] UserPayload userPayload)
         {
@@ -81,13 +81,14 @@ namespace DotnetJWT.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex);
+                return BadRequest(ex.Message);
             }
         }
 
         /// <summary>Refresh Token</summary>
         /// <remarks>It is possible user refresh token credentials.</remarks>
-        [HttpPost("refreshtoken")]
+        /// <param name="actualToken">Token actual for refresh.</param>
+        [HttpPut("refreshtoken")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<string>> RefreshToken(string actualToken)
         {
@@ -106,7 +107,7 @@ namespace DotnetJWT.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex);
+                return BadRequest(ex.Message);
             }
         }
     }

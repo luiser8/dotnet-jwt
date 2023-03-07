@@ -1,3 +1,5 @@
+using DotnetJWT.Models;
+
 namespace DotnetJWT.Request.User.Payloads
 {
     public class UserPayload
@@ -7,5 +9,6 @@ namespace DotnetJWT.Request.User.Payloads
         public string? Email { get; set; }
         public string? UserName { get; set; }
         public string? Password { get; set; }
+        public int? RoleId { get; set; }
     }
 }

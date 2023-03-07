@@ -3,7 +3,6 @@ using DotnetJWT.Request.User.Payloads;
 using DotnetJWT.Responses;
 using DotnetJWT.JWtUtils;
 using Microsoft.EntityFrameworkCore;
-using System.Text;
 
 namespace DotnetJWT.Repository
 {
@@ -15,14 +14,31 @@ namespace DotnetJWT.Repository
             _contextOptions = context;
         }
 
-        public async Task<List<User>> GetUsersRepository()
+        public async Task<List<UserResponse>> GetUsersRepository()
         {
             try
             {
                 using (var _context = new DBContext(_contextOptions))
                 {
-                    var response = await _context.Users.ToListAsync();
-                    return response;
+                    var users = await _context.Users.ToListAsync();
+                    var userResponse = new List<UserResponse>();
+                    foreach(var item in users)
+                    {
+                        userResponse.Add(new UserResponse
+                        {
+                            Id = item.Id,
+                            RoleId = (int)item.RoleId,
+                            FirstName = item.FirstName,
+                            LastName = item.LastName,
+                            Email = item.Email,
+                            UserName = item.UserName,
+                            AccessToken = item.AccessToken,
+                            RefreshToken = item.RefreshToken,
+                            TokenCreated = item.TokenCreated,
+                            TokenExpires = item.TokenExpires,
+                        });
+                    }
+                    return userResponse;
                 }
             }
             catch (Exception ex)
@@ -69,25 +85,23 @@ namespace DotnetJWT.Repository
             {
                 using (var _context = new DBContext(_contextOptions))
                 {
-                    var response = await _context.Users.FirstOrDefaultAsync(x => x.UserName == loginPayload.UserName);
                     var user = new UserResponse();
+                    var response = await _context.Users.FirstOrDefaultAsync(
+                                                                            x => x.UserName == loginPayload.UserName
+                                                                            && x.PasswordHash == MD5Utils.Md5utils.GetMD5(loginPayload.Password));
+
+                    var rolesResponse = await _context.Roles.Where(x => x.Id == response.RoleId).FirstOrDefaultAsync();
+                    var roles = new Role { Id = rolesResponse.Id, RoleName = rolesResponse.RoleName };
 
                     if (response == null)
                         throw new Exception("User not found");
 
-                    byte[] bytesPasswordHash = Encoding.ASCII.GetBytes(response.PasswordHash);
-                    byte[] bytesPasswordSalt = Encoding.ASCII.GetBytes(response.PasswordSalt);
-
-                    if (JwtUtils.VerifyPasswordHash(response.PasswordHash, bytesPasswordHash, bytesPasswordSalt))
-                    {
-                        return user;
-                    }
-
                     if (response != null)
                     {
-                        user = new UserResponse
+                       user = new UserResponse
                         {
                             Id = response.Id,
+                            RoleId = (int)response.RoleId,
                             FirstName = response.FirstName,
                             LastName = response.LastName,
                             Email = response.Email,
@@ -95,7 +109,8 @@ namespace DotnetJWT.Repository
                             AccessToken = response.AccessToken,
                             RefreshToken = response.RefreshToken,
                             TokenCreated = response.TokenCreated,
-                            TokenExpires = response.TokenExpires
+                            TokenExpires = response.TokenExpires,
+                            Roles = roles,
                         };
                     }
 
@@ -123,8 +138,7 @@ namespace DotnetJWT.Repository
                     JwtUtils.CreatePasswordHash(userPayload.Password, out byte[] passwordHash, out byte[] passwordSalt);
                     string accessToken = JwtUtils.CreateToken(userPayload.UserName);
                     string refreshToken = JwtUtils.RefreshToken(userPayload.UserName);
-                    string passwordHashCreated = Convert.ToBase64String(passwordHash);
-                    string passwordSaltCreated = Convert.ToBase64String(passwordSalt);
+                    string passwordHashCreated = MD5Utils.Md5utils.GetMD5(userPayload.Password);
 
                     var user = new User
                     {
@@ -133,11 +147,11 @@ namespace DotnetJWT.Repository
                         Email = userPayload.Email,
                         UserName = userPayload.UserName,
                         PasswordHash = passwordHashCreated,
-                        PasswordSalt = passwordSaltCreated,
                         AccessToken = accessToken,
                         RefreshToken = refreshToken,
                         TokenCreated = DateTime.Now,
                         TokenExpires = DateTime.Now.AddDays(7),
+                        RoleId = userPayload.RoleId,
                     };
                     await _context.Users.AddAsync(user);
                     await _context.SaveChangesAsync();

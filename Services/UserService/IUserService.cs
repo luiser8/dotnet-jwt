@@ -6,7 +6,7 @@ namespace DotnetJWT.Services
 {
     public interface IUserService
     {
-        Task<List<User>> GetUsersService();
+        Task<List<UserResponse>> GetUsersService();
         Task<UserResponse> LoginUserService(LoginPayload loginPayload);
         Task<UserResponse> PostUsersService(UserPayload userPayload);
         Task<string> RefreshTokenService(string actualToken);
