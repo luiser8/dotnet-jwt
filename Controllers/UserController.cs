@@ -40,7 +40,7 @@ namespace DotnetJWT.Controllers
         /// <remarks>It is possible user login credentials.</remarks>
         [HttpPost("login")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<UserResponse>> LoginUser([FromBody] LoginPayload loginPayload)
+        public async Task<ActionResult<TokenResponseDto>> LoginUser([FromBody] LoginPayload loginPayload)
         {
             try
             {
@@ -48,11 +48,11 @@ namespace DotnetJWT.Controllers
                 var cookieOptions = new CookieOptions
                 {
                     HttpOnly = true,
-                    Expires = response.TokenExpires,
+                    Expires = DateTime.Now.AddDays(1),
                     Secure = true,
                     IsEssential = true
                 };
-                Response.Cookies.Append("accessToken", response.AccessToken, cookieOptions);
+                Response.Cookies.Append("accessToken", response.accessToken, cookieOptions);
 
                 return Ok(response);
             }
@@ -90,16 +90,12 @@ namespace DotnetJWT.Controllers
         /// <param name="actualToken">Token actual for refresh.</param>
         [HttpPut("refreshtoken")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<string>> RefreshToken(string actualToken)
+        public async Task<ActionResult<TokenResponseDto>> RefreshToken(string actualToken)
         {
             try
             {
                 var response = await _userService.RefreshTokenService(actualToken);
-                if (response == "Invalid Refresh Token")
-                {
-                    return Unauthorized(response);
-                }
-                if (response == "Token expired")
+                if (response == null)
                 {
                     return Unauthorized(response);
                 }

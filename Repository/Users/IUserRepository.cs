@@ -7,9 +7,9 @@ namespace DotnetJWT.Repository
     public interface IUserRepository
     {
         Task<List<UserResponse>> GetUsersRepository();
-        Task<UserResponse> LoginUserRepository(LoginPayload loginPayload);
+        Task<TokenResponseDto> LoginUserRepository(LoginPayload loginPayload);
         Task<User> PostUsersRepository(UserPayload userPayload);
-        Task<string> RefreshTokenRepository(string actualToken);
+        Task<TokenResponseDto> RefreshTokenRepository(string actualToken);
         Task<bool> ByEmailRepository(string email);
         Task<bool> ByUserNameRepository(string userName);
     }

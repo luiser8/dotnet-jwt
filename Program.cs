@@ -49,14 +49,14 @@ builder.Services.AddAuthentication(options =>
     }).AddJwtBearer(options =>
     {
         options.TokenValidationParameters = new TokenValidationParameters
-            {
-                ValidateIssuerSigningKey = true,
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8
                     .GetBytes(builder.Configuration.GetSection("AppSettings:Token").Value)),
-                ValidateLifetime = true,
-                ValidateAudience = false,
-                ValidateIssuer = false
-            };
+            ValidateLifetime = true,
+            ValidateAudience = false,
+            ValidateIssuer = false
+        };
     });
 builder.Services.AddCors(options =>
     {

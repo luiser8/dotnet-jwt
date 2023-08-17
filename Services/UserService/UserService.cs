@@ -55,7 +55,7 @@ namespace DotnetJWT.Services
             }
         }
 
-        public async Task<UserResponse> LoginUserService(LoginPayload loginPayload)
+        public async Task<TokenResponseDto> LoginUserService(LoginPayload loginPayload)
         {
             try
             {
@@ -68,7 +68,7 @@ namespace DotnetJWT.Services
             }
         }
 
-        public async Task<string> RefreshTokenService(string actualToken)
+        public async Task<TokenResponseDto> RefreshTokenService(string actualToken)
         {
             try
             {
